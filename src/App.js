@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import twitterLogo from "./assets/twitter-logo.svg"
+import SelectCharacter from "./Components/SelectCharacter";
 import "./App.css"
 
 // Constants
@@ -9,6 +10,7 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`
 const App = () => {
 
   const [currentAccount, setCurrentAccount] = useState(null)
+  const [characterNFT, setCharacterNFT] = useState(null)
 
   const checkIfWalletIsConnected = async () => {
     try{
@@ -29,6 +31,27 @@ const App = () => {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const renderContent = () => {
+    if(!currentAccount) {
+      return (
+        <div className="connect-wallet-container">
+            <img
+              src="https://media.giphy.com/media/PJvvewo5mTtXW/giphy.gif"
+              alt="Samurai Gif"
+            />
+            <button
+              className="cta-button connect-wallet-button"
+              onClick={connectWalletAction}
+            >
+              Conecte sua carteira para começar
+            </button>
+          </div>
+      );
+    } else if (currentAccount && !characterNFT) {
+      return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
     }
   };
 
@@ -60,18 +83,7 @@ const App = () => {
         <div className="header-container">
           <p className="header gradient-text">⚔️ Batalhas no Metaverso ⚔️</p>
           <p className="sub-text">Junte-se a mim para vencer os inimigos do Metaverso!</p>
-          <div className="connect-wallet-container">
-            <img
-              src="https://media.giphy.com/media/PJvvewo5mTtXW/giphy.gif"
-              alt="Samurai Gif"
-            />
-            <button
-              className="cta-button connect-wallet-button"
-              onClick={connectWalletAction}
-            >
-              Conecte sua carteira para começar
-            </button>
-          </div>
+          {renderContent()}
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
