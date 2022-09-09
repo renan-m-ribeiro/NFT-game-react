@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react"
 import twitterLogo from "./assets/twitter-logo.svg"
 import SelectCharacter from "./Components/SelectCharacter";
+import myEpicGame from "./utils/MyEpicGame.json";
+import { CONTRACT_ADDRESS, transformCharacterData } from "./constants";
 import "./App.css"
+import { ethers } from "ethers";
 
 // Constants
 const TWITTER_HANDLE = "web3dev_"
@@ -54,6 +57,16 @@ const App = () => {
       return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
     }
   };
+  
+  const checkNetwork = async () => {
+    try {
+      if (window.ethereum.networkVersion !== "5") {
+        alert("Please connect to Goerli!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const connectWalletAction = async () => {
     try {
@@ -70,12 +83,39 @@ const App = () => {
     } catch (error) {
       console.log(error);
     }
+    checkNetwork();
   };
-
-
+  
   useEffect(() =>{
     checkIfWalletIsConnected();
   },[]);
+
+  useEffect(() => {
+    const fetchNFTMetadata = async () => {
+      console.log("Verificando pelo personagem NFT no endereço:", currentAccount);
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const gameContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        myEpicGame.abi,
+        signer
+      );
+
+      const txn = await gameContract.checkIfUserHasNFT();
+      if(txn.name) {
+        console.log("Usuario possui um personagem NFT");
+        setCharacterNFT(transformCharacterData(txn));
+      } else {
+        console.log("Nenhum personagem NFT encontrado");
+      }
+    };
+
+    if(currentAccount) {
+      console.log("Conta Atual: ", currentAccount);
+      fetchNFTMetadata();
+    }
+  },[currentAccount]);
 
   return (
     <div className="App">
